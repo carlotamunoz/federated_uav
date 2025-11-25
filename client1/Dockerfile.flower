@@ -1,0 +1,11 @@
+FROM pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
+
+WORKDIR /app
+
+# Copy train.py (to reuse the model definition) and the Flower client
+COPY train.py /app/
+COPY flower_client.py /app/
+
+RUN pip install --no-cache-dir flwr pillow numpy torchvision matplotlib torchmetrics tqdm
+
+CMD ["python", "flower_client.py"]

@@ -1,0 +1,85 @@
+services:
+  flower_server:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile.server
+    ports:
+      - "8087:8080"
+
+  client1_ingest:
+    build:
+      context: ./client1
+      dockerfile: Dockerfile.ingest
+    environment:
+      CLIENT_ID: client1
+    volumes:
+      - ./raw_data:/raw_data
+      - client1_shared:/shared/data
+
+  client1_train:
+    build:
+      context: ./client1
+      dockerfile: Dockerfile.train
+    depends_on:
+      - client1_ingest
+    volumes:
+      - client1_shared:/shared/data
+      - client1_model:/shared/model
+    shm_size: "2gb"       # Added here to increase shared memory
+
+  client1_flower:
+    build:
+      context: ./client1
+      dockerfile: Dockerfile.flower
+    depends_on:
+      - flower_server
+      - client1_train
+    volumes:
+      - client1_shared:/shared/data
+      - client1_model:/shared/model
+      - ./models:/models
+    environment:
+      - SERVER_ADDRESS=flower_server:8080
+    shm_size: "2gb"       # Added here to increase shared memory
+
+  client2_ingest:
+    build:
+      context: ./client2
+      dockerfile: Dockerfile.ingest
+    environment:
+      CLIENT_ID: client2
+    volumes:
+      - ./raw_data:/raw_data
+      - client2_shared:/shared/data
+
+  client2_train:
+    build:
+      context: ./client2
+      dockerfile: Dockerfile.train
+    depends_on:
+      - client2_ingest
+    volumes:
+      - client2_shared:/shared/data
+      - client2_model:/shared/model
+    shm_size: "2gb"       # Added here to increase shared memory
+
+  client2_flower:
+    build:
+      context: ./client2
+      dockerfile: Dockerfile.flower
+    depends_on:
+      - flower_server
+      - client2_train
+    volumes:
+      - client2_shared:/shared/data
+      - client2_model:/shared/model
+      - ./models:/models
+    environment:
+      - SERVER_ADDRESS=flower_server:8080
+    shm_size: "2gb"       # Added here to increase shared memory
+
+volumes:
+  client1_shared:
+  client1_model:
+  client2_shared:
+  client2_model:

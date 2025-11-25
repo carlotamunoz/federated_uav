@@ -1,0 +1,13 @@
+FROM python:3.10-slim
+
+# Create working directory
+WORKDIR /app
+
+# Copy ingest.py (the ingestion script)
+COPY ingest.py /app/
+
+# Install minimal dependencies needed for ingest.py
+RUN pip install --no-cache-dir pillow numpy torch torchvision
+
+# Entry point (runs ingestion and preprocessing)
+CMD ["python", "ingest.py"]

@@ -1,0 +1,16 @@
+FROM python:3.10-slim
+
+# Create working directory
+WORKDIR /app
+
+# Install required libraries
+RUN pip install --no-cache-dir flwr
+
+# Copy the server file
+COPY server.py /app/server.py
+
+# Expose port for Flower
+EXPOSE 8080
+
+# Run server
+CMD ["python", "server.py"]
